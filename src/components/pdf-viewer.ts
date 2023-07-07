@@ -36,8 +36,6 @@ export class PdfViewer extends LitElement {
   @query('#pdf-viewer')
   declare pdfViewerElement: Element;
 
-  declare taskValue: unknown;
-
   async firstUpdated() {
     if(!this.pdfURL) throw Error('pdfURL property is mandatory');
     console.log(this.pdfViewerElement)
