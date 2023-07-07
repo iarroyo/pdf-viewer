@@ -1,0 +1,22 @@
+{
+  "name": "pdf-viewer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "postinstall": "node config/copy-webviewer-files.js"
+  },
+  "dependencies": {
+    "@pdftron/pdfjs-express": "^8.7.4",
+    "lit": "^2.7.5"
+  },
+  "devDependencies": {
+    "@lit-labs/task": "^2.1.2",
+    "fs-extra": "^11.1.1",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.0"
+  }
+}

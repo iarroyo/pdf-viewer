@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/index.ts"></script>
+    <style>
+      html {
+        height: 100%;
+        width: 100%;
+      }
+      body {
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <pdf-viewer pdfURL="/sample.pdf"></pdf-viewer>
+    <script>
+      const pdfViewerEl = document.querySelector('pdf-viewer');
+      pdfViewerEl.addEventListener('pdf-viewer-extension-event', async (e)=> {
+
+        const pdfViewer = e.detail.pdfViewerInstance;
+
+        ///// START Custom Extension /////
+        const newButton = {
+          type: 'actionButton',
+          img: '/download.svg',
+          onClick: async () => {
+            //alert('Hello world!');
+            const { docViewer } = pdfViewer;
+            pdfViewer.annotManager.exportAnnotations().then((v) => console.log(v));
+            const documentStream = await docViewer.getDocument().getFileData({});
+            const documentBlob = new Blob([documentStream], { type: 'application/pdf' });
+
+            // Convert your blob into a Blob URL (a special url that points to an object in the browser's memory)
+            const blobUrl = URL.createObjectURL(documentBlob);
+            // Create a link element
+            const link = document.createElement('a');
+
+            // Set link's href to point to the Blob URL
+            link.href = blobUrl;
+            link.download = name;
+
+            // Append link to the body
+            document.body.appendChild(link);
+
+            // Dispatch click event on the link
+            // This is necessary as link.click() does not work on the latest firefox
+            link.dispatchEvent(
+              new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+              }),
+            );
+
+            // Remove link from body
+            document.body.removeChild(link);
+          },
+          dataElement: 'alertButton',
+        };
+
+        // Add a new button that alerts "Hello world!" when clicked
+        pdfViewer.setHeaderItems((header) => {
+          header.push(newButton);
+        });
+         ///// END Custom Extension /////
+
+        //Resolve extension
+        e.detail.pdfViewerReady();
+      });
+    </script>
+  </body>
+</html>

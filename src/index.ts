@@ -1,0 +1,1 @@
+export { PdfViewer } from './components/pdf-viewer'
