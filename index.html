@@ -20,11 +20,7 @@
   <body>
     <pdf-viewer pdfURL="/sample.pdf"></pdf-viewer>
     <script>
-      const pdfViewerEl = document.querySelector('pdf-viewer');
-      pdfViewerEl.addEventListener('pdf-viewer-extension-event', async (e)=> {
-
-        const pdfViewer = e.detail.pdfViewerInstance;
-
+      const extendPDF = (pdfViewer) => {
         ///// START Custom Extension /////
         const newButton = {
           type: 'actionButton',
@@ -69,7 +65,17 @@
           header.push(newButton);
         });
          ///// END Custom Extension /////
+      }
 
+      const pdfViewerEl = document.querySelector('pdf-viewer');
+
+      //Extend PDF viewer by callback
+      pdfViewerEl.callback = extendPDF;
+
+      //Exttend PDF viewer by event
+      pdfViewerEl.addEventListener('pdf-viewer-extension-event', async (e)=> {
+        const pdfViewer = e.detail.pdfViewerInstance;
+        extendPDF(pdfViewer);
         //Resolve extension
         e.detail.pdfViewerReady();
       });

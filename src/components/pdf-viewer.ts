@@ -28,7 +28,10 @@ export class PdfViewer extends LitElement {
   pdfURL: string | undefined;
 
   @property()
-  extensionTimeouMs: number = 2000;
+  eventTimeoutMs: number = 2000;
+
+  @property()
+  declare callback: (pdfInstance:unknown)=> Promise<void> | undefined;
 
   @state()
   isRendered = false;
@@ -49,14 +52,26 @@ export class PdfViewer extends LitElement {
     //PDF viewer features would go here 
     this.onPdfViewerInstantiated(pdfViewerInstance);
 
-    //Extension point
-    const isExtended = await new Promise((r) => {
+    //External PDF viewer extension
+    const isExtended =  await this.onPdfViewerExtended(pdfViewerInstance);
+    console.info(`PDF viewer has been extended ${isExtended}`);
+    this.isRendered = true;
+  }
+
+  async onPdfViewerExtended(pdfInstance:unknown): Promise<boolean> {
+    //Extension point by callback
+    if(this.callback !== undefined){
+      await this.callback(pdfInstance);
+      return true;
+    }else{
+    //Extension point by event
+    return await new Promise((r) => {
       //max time to wait in order to extend the PDF viewer
-      const timeout = setTimeout(()=> r(false), this.extensionTimeouMs);
+      const timeout = setTimeout(()=> r(false), this.eventTimeoutMs);
       let event = new CustomEvent('pdf-viewer-extension-event', 
       { 
         detail: {
-          pdfViewerInstance: pdfViewerInstance,
+          pdfViewerInstance: pdfInstance,
           pdfViewerReady:()=> {
             clearTimeout(timeout);
             r(true);
@@ -65,8 +80,7 @@ export class PdfViewer extends LitElement {
       });
       this.dispatchEvent(event);
     });
-    console.info(`External PDF extension ${isExtended}`);
-    this.isRendered = true;
+    }
   }
 
 
@@ -81,7 +95,6 @@ export class PdfViewer extends LitElement {
   }
 
   render() {
-    console.log('render');
     return html`
       ${this.loader()}
       <div id="pdf-viewer" class="full ${this.isRendered ? '': 'hidden'}"></div>
